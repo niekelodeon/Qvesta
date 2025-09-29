@@ -1,9 +1,15 @@
-import './App.css'
+import Quiz from "./components/Quiz"
 
-function App() {
+import './index.css'
+
+function App () {
     return (
         <>
-            <div></div>
+            <div>
+
+                <Quiz />
+
+            </div>
         </>
     )
 }
