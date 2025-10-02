@@ -1,23 +1,32 @@
 export interface Quiz {
-    id: string
+    id: number
     name: string
     questions: Question[]
     time: number
+    type: string
+    navigate: boolean
 }
 
 export interface Question {
-    id: string
-    text: string
+    id: number
+    question: string
     image?: string
     answers: string[]
     time: number | null
 }
 
 export interface GivenAnswer {
-    questionId: string
-    selectedAnswerIndex: number
+    id: number
+    chosenAnswer: number
+}
+
+export interface QuizResults {
+    quizId: number
+    username: string
+    answers: GivenAnswer[]
 }
 
 export interface Progression {
     percentage: number
 }
+

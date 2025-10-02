@@ -1,35 +1,81 @@
-import React from "react"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
+
+import type { Quiz, Question, GivenAnswer, QuizResults, Progression } from "../lib/types"
 
 import { testQuiz } from "../lib/testQuiz"
-
-import type { Quiz, Question, GivenAnswer, Progression } from "../lib/types"
 
 export default function Quiz () {
     const [quiz, setQuiz] = useState<Quiz>(testQuiz)
     const [quizTime, setQuizTime] = useState<number | null>(testQuiz.time) 
+    const [allowNavigating, setAllowNavigating] = useState<boolean>(testQuiz.navigate)
+
     const [index, setIndex] = useState(0)
     const [question, setQuestion] = useState<Question>(testQuiz.questions[index]) 
-    const [questionTime, setQuestionTime] = useState<number | null>(testQuiz.questions[index].time) 
-    const [givenAnswers, setGivenAnswers] = useState<GivenAnswer[]>() 
+    const [questionTime, setQuestionTime] = useState<number | null>(testQuiz.questions[index].time)
+    const [givenAnswers, setGivenAnswers] = useState<GivenAnswer[]>([])
+
     const [progression, setProgression] = useState<Progression>() 
     const [quizCompleted, setQuizCompleted] = useState<boolean>(false)
 
     const totalQuestions: number = testQuiz.questions.length
 
-    function nextQuestion () {
+    // when the user doesnt select a answer push null to givenAnswers, null meaning unanswered
+    // when the user navigates through questions show what answer he has given, if any.
+
+    function loadQuestion (newIndex: number) {
+        const question = testQuiz.questions[newIndex]
+
+        setIndex(newIndex)
+        setQuestion(question)
+        setQuestionTime(question.time)
+    }
+
+    function nextQuestion (answerIndex?: number) {
+        if (answerIndex !== undefined && question) {
+            saveAnswer(question.id, answerIndex + 1)
+        }
+
         const newIndex = index + 1
 
         if (newIndex >= totalQuestions) {
-
-            // create full object of the given answer to what question, etc.
             setQuizCompleted(true)
+
+            const quizResults: QuizResults = {
+                quizId: testQuiz.id,
+                username: "TestQuiz_User", // get username dynamically
+                answers: givenAnswers
+            }
+
+            console.log(quizResults)
+            
             return
         }
         
-        setIndex(newIndex)
-        setQuestion(testQuiz.questions[newIndex])
-        setQuestionTime(testQuiz.questions[newIndex].time)
+        loadQuestion(newIndex)
+    }
+
+    function prevQuestion () {
+        if (index === 0) return 
+
+        const newIndex = index - 1
+
+        loadQuestion(newIndex)
+    }
+
+    function saveAnswer (questionId: number, chosenAnswer: number) {
+        setGivenAnswers((prev) => {
+            const existingIndex = prev.findIndex(a => a.id === questionId)
+
+            if (existingIndex !== -1) {
+                // Replace the existing answer
+                const updated = [...prev]
+                updated[existingIndex] = { id: questionId, chosenAnswer }
+                return updated
+            }
+
+            // Add new answer
+            return [...prev, { id: questionId, chosenAnswer }]
+        })
     }
 
     function quizTimer (quizTime: number | null) {
@@ -81,8 +127,6 @@ export default function Quiz () {
 
         getProgression()
         return quizTimer(quizTime), questionTimer(questionTime, nextQuestion)
-
-        // then when a answer is selected, run nextQuestion and save the givenAnswer in a object or something that is easy to check for the server
     }, [quiz, question])
 
     return (
@@ -103,19 +147,39 @@ export default function Quiz () {
 
                     <h1>{quiz.name}</h1>
 
-                    <h2>{question.text}</h2>
+                    <h2>{question.question}</h2>
 
-                    {question.answers.map((answer, i) => (
-                        <span onClick={nextQuestion} key={i}>{answer}</span>
-                    ))}
+                    <div className="container-answers" style={{ display: "flex", gap: "20px" }}>
+
+                        {question.answers.map((answer, i) => (
+                            <span onClick={() => nextQuestion(i)} key={i}>
+                                {answer}
+                            </span>
+                        ))}
+
+                    </div>
+
+                    {allowNavigating ? (
+
+                        <div className="container-navigate">
+
+                            <button onClick={() => prevQuestion()}>Go back</button>
+
+                            <button onClick={() => nextQuestion()}>Go forward</button>
+
+                        </div>
+
+                    ) : (
+
+                        <div className="container-navigate">navigating is disabled</div>
+
+                    )}
 
                 </div>
 
             )}
 
         </div>
-
-        
 
     )
 }
