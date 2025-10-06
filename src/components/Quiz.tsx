@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 
-import type { Quiz, Question, GivenAnswer, QuizResults, Progression } from "../lib/types"
+import type { Quiz, Question, GivenAnswer, QuizResults } from "../lib/types"
 
 import { testQuiz } from "../lib/testQuiz"
 
@@ -9,18 +9,37 @@ export default function Quiz () {
     const [quizTime, setQuizTime] = useState<number | null>(testQuiz.time) 
     const [allowNavigating, setAllowNavigating] = useState<boolean>(testQuiz.navigate)
 
+    const [totalQuestions, setTotalQuestions] = useState<number>(testQuiz.questions.length)
+
     const [index, setIndex] = useState(0)
     const [question, setQuestion] = useState<Question>(testQuiz.questions[index]) 
     const [questionTime, setQuestionTime] = useState<number | null>(testQuiz.questions[index].time)
     const [givenAnswers, setGivenAnswers] = useState<GivenAnswer[]>([])
+    const [givenAnswer, setGivenAnswer] = useState<any>()
 
-    const [progression, setProgression] = useState<Progression>() 
+    const [progression, setProgression] = useState<number>(0)
     const [quizCompleted, setQuizCompleted] = useState<boolean>(false)
 
-    const totalQuestions: number = testQuiz.questions.length
+    function getAnswer (questionId: number) {
+        const chosenAnswer: number | null = givenAnswers.find(a => a.id === questionId)?.chosenAnswer ?? null
+        setGivenAnswer(chosenAnswer)
+    }
 
-    // when the user doesnt select a answer push null to givenAnswers, null meaning unanswered
-    // when the user navigates through questions show what answer he has given, if any.
+    function saveAnswer (questionId: number, chosenAnswer: number | null) {
+        chosenAnswer = chosenAnswer ?? null
+
+        setGivenAnswers((prev) => {
+            const existingIndex = prev.findIndex(a => a.id === questionId)
+
+            if (existingIndex !== -1) {
+                const updated = [...prev]
+                updated[existingIndex] = { id: questionId, chosenAnswer }
+                return updated
+            }
+
+            return [...prev, { id: questionId, chosenAnswer }]
+        })
+    }
 
     function loadQuestion (newIndex: number) {
         const question = testQuiz.questions[newIndex]
@@ -30,10 +49,24 @@ export default function Quiz () {
         setQuestionTime(question.time)
     }
 
-    function nextQuestion (answerIndex?: number) {
-        if (answerIndex !== undefined && question) {
-            saveAnswer(question.id, answerIndex + 1)
+    function nextQuestion (answerIndex?: number | null) {
+        if (!question) return
+
+        const existing = givenAnswers.find(a => a.id === question.id)
+
+        let chosenAnswer: number | null
+
+        if (typeof answerIndex === "number") {
+            chosenAnswer = answerIndex + 1 
+        } else if (existing) {
+            chosenAnswer = existing.chosenAnswer 
+        } else {
+            chosenAnswer = null
         }
+
+        saveAnswer(question.id, chosenAnswer)
+
+        setGivenAnswer(chosenAnswer)
 
         const newIndex = index + 1
 
@@ -42,7 +75,7 @@ export default function Quiz () {
 
             const quizResults: QuizResults = {
                 quizId: testQuiz.id,
-                username: "TestQuiz_User", // get username dynamically
+                username: "TestQuiz_User",
                 answers: givenAnswers
             }
 
@@ -60,22 +93,6 @@ export default function Quiz () {
         const newIndex = index - 1
 
         loadQuestion(newIndex)
-    }
-
-    function saveAnswer (questionId: number, chosenAnswer: number) {
-        setGivenAnswers((prev) => {
-            const existingIndex = prev.findIndex(a => a.id === questionId)
-
-            if (existingIndex !== -1) {
-                // Replace the existing answer
-                const updated = [...prev]
-                updated[existingIndex] = { id: questionId, chosenAnswer }
-                return updated
-            }
-
-            // Add new answer
-            return [...prev, { id: questionId, chosenAnswer }]
-        })
     }
 
     function quizTimer (quizTime: number | null) {
@@ -114,20 +131,18 @@ export default function Quiz () {
         return () => clearInterval(interval)
     }
 
-    function getProgression () {
-        const percentageOfQuestion: number = 100 / totalQuestions 
-        const percentage: number = index * percentageOfQuestion
-
-        return percentage
-    }
-
     useEffect(() => {
         console.log(quiz, "Quiz useState")
+        console.log(index, "Index useState")
         console.log(question, "Question useState")
-
-        getProgression()
+        console.log(givenAnswers, "givenAnswers useState")
+        console.log(givenAnswer, "givenAnswer useState")        
+        console.log(progression, "Progression useState") 
+        
+        setProgression(Math.round((index * 100) / totalQuestions))
+        getAnswer(question.id)
         return quizTimer(quizTime), questionTimer(questionTime, nextQuestion)
-    }, [quiz, question])
+    }, [quiz, index, question, progression])
 
     return (
 
@@ -152,10 +167,14 @@ export default function Quiz () {
                     <div className="container-answers" style={{ display: "flex", gap: "20px" }}>
 
                         {question.answers.map((answer, i) => (
+
                             <span onClick={() => nextQuestion(i)} key={i}>
                                 {answer}
                             </span>
+
                         ))}
+
+                          {givenAnswer !== null && givenAnswer !== undefined ? givenAnswer : "Not answered"}
 
                     </div>
 
