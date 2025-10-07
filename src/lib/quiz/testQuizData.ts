@@ -1,9 +1,9 @@
-import type { Quiz } from "./types"
+import type { QuizData } from "../types"
 
-export const testQuiz: Quiz = {
+export const testQuizData: QuizData = {
     id: 1,
     name: "Basic Knowledge Quiz",
-    description: null,
+    description: "A quiz to test your knowledge :)",
     image: "",
     time: 1000,
     navigate: true,

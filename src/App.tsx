@@ -1,4 +1,4 @@
-import Quiz from "./components/Quiz"
+import QuizPage from "./pages/QuizPage"
 
 import './index.css'
 
@@ -7,7 +7,7 @@ function App () {
         <>
             <div>
 
-                <Quiz />
+                <QuizPage />
 
             </div>
         </>

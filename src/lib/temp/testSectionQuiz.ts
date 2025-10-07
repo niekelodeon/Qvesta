@@ -1,6 +1,6 @@
-import type { Quiz } from "./types"
+import type { QuizData } from "./types"
 
-export const multiSectionQuiz: Quiz = {
+export const multiSectionQuiz: QuizData = {
     id: 2,
     name: "Multi-Section Knowledge Quiz",
     image: "",

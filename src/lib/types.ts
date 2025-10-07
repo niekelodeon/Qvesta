@@ -1,26 +1,15 @@
-export interface Quiz {
+export interface QuizData {
     id: number
     name: string
     description: string | null
     image: string | null
-    questions: Question[]
+    questions: QuestionData[]
     time: number | null
     navigate: boolean
     progress: boolean
 }
 
-export interface multiSectionQuiz {
-    id: number
-    title: string                
-    description: string | null        
-    image?: string | null       
-    time: number | null        
-    navigate?: boolean             
-    progress?: boolean             
-    questions: Question[]   
-}
-
-export interface Question {
+export interface QuestionData {
     id: number
     question: string
     image?: string
@@ -38,4 +27,15 @@ export interface QuizResults {
     username: string
     answers: GivenAnswer[]
 }
+
+// export interface multiSectionQuiz {
+//     id: number
+//     title: string                
+//     description: string | null        
+//     image?: string | null       
+//     time: number | null        
+//     navigate?: boolean             
+//     progress?: boolean             
+//     questions: Question[]   
+// }
 
