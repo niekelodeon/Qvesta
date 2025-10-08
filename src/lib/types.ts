@@ -22,7 +22,13 @@ export interface GivenAnswer {
     chosenAnswer: number | null
 }
 
-export interface QuizResults {
+export interface SubmitAnswers {
+    quizId: number
+    username: string
+    answers: GivenAnswer[]
+}
+
+export interface QuizResult {
     quizId: number
     username: string
     answers: GivenAnswer[]

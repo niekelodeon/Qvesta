@@ -5,21 +5,21 @@ import { quizDataAtom, quizCompletedAtom, quizAnswersAtom } from "../lib/atoms"
 
 import type { QuestionData } from "../lib/types"
 
-export default function Quiz () {
+export default function QuizComponent () {
     const [quizData, setQuizData] = useAtom(quizDataAtom)
     const [quizAnswers, setQuizAnswers] = useAtom(quizAnswersAtom)
     const [quizCompleted, setQuizCompleted] = useAtom(quizCompletedAtom)
 
-    const [quizTime, setQuizTime] = useState<number | null>(quizData.time) 
+    const [quizTime, setQuizTime] = useState<number | null>(quizData.time)
 
     const [questionIndex, setQuestionIndex] = useState(0)
-    const [questionData, setQuestionData] = useState<QuestionData>(quizData.questions[questionIndex]) 
+    const [questionData, setQuestionData] = useState<QuestionData>(quizData.questions[questionIndex])
     const [questionTime, setQuestionTime] = useState<number | null>(quizData.questions[questionIndex].time)
     const [totalQuestions, setTotalQuestions] = useState<number>(quizData.questions.length)
     const [givenAnswer, setGivenAnswer] = useState<any>()
 
     const [allowNavigating, setAllowNavigating] = useState<boolean>(quizData.navigate)
-    const [progression, setProgression] = useState<number>(0) 
+    const [progression, setProgression] = useState<number>(0)
     
     function getAnswer (questionId: number) {
         const answer = quizAnswers.find(a => a.id === questionId)
@@ -115,14 +115,7 @@ export default function Quiz () {
         return () => clearInterval(interval)
     }
 
-    useEffect(() => {
-        console.log(quizData, "Quiz useState")
-        console.log(questionData, "Question useState")
-        console.log(questionIndex, "Index useState")
-        console.log(givenAnswer, "givenAnswer useState")        
-        console.log(quizAnswers, "givenAnswers useState")
-        console.log(progression, "Progression useState")
-        
+    useEffect(() => {  
         setProgression(Math.round((questionIndex * 100) / totalQuestions))
         getAnswer(questionData.id)
         return quizTimer(quizTime), questionTimer(questionTime, nextQuestion)

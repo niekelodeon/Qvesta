@@ -2,17 +2,20 @@ import React, { useState, useEffect } from "react"
 import { useAtom } from "jotai"
 
 import { quizDataAtom, quizCompletedAtom, quizAnswersAtom } from "../lib/atoms"
+
+import type { SubmitAnswers } from "../lib/types"
+
 import { testQuizData } from "../lib/quiz/testQuizData"
 
 import { quizApi } from "../lib/quiz/QuizApi"
 
-import Quiz from "../components/QuizComponent"
+import QuizComponent from "../components/QuizComponent"
 
 export default function QuizPage () {
-    const [code, setCode] = useState<number>(0)
+    const [code, setCode] = useState<string>()
     const [username, setUsername] = useState<string>("")
-    const [joinedQuiz, setJoinedQuiz] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
+    const [joinedQuiz, setJoinedQuiz] = useState<boolean>(false)
 
     const [quizData, setQuizData] = useAtom(quizDataAtom)
     const [quizStarted, setQuizStarted] = useState<boolean>(false)
@@ -22,10 +25,12 @@ export default function QuizPage () {
     async function joinQuiz () {
         try {
             const response = await quizApi.join(code, username)
+
             if (!response.success) setError("Invalid code")
             else if (response.success) setJoinedQuiz(true); setQuizData(response.quizData)
         } catch (err: any) {
-            console.log(err)
+            setError(err)
+            console.error("Failed to join quiz:", error)
         }
     }
 
@@ -33,19 +38,19 @@ export default function QuizPage () {
         setQuizStarted(true)
     }
 
-    function finishQuiz () {
-        // send the data back to the server to check
+    async function finishQuiz () {
+        const submitAnswers: SubmitAnswers = {
+            quizId: quizData.id,
+            username,
+            answers: quizAnswers
+        }
+
+        await quizApi.submit(submitAnswers)
     }
 
     useEffect(() => {
-        console.log(quizData, "quizData useAtom")
-        console.log(quizStarted, "quizStarted useAtom")
-        console.log(quizCompleted, "quizCompleted useAtom")
-        console.log(quizAnswers, "quizAnswers useAtom")
-
-        console.log(code, "code useState")
-        console.log(username, "username useState")
-    }, [quizData, quizStarted, quizCompleted])
+        finishQuiz()
+    }, [quizCompleted])
 
     return (
 
@@ -74,12 +79,12 @@ export default function QuizPage () {
 
                     <input
                         type="text"
-                        placeholder="Enter quiz code"
+                        placeholder="Enter code"
                         value={code}
-                        onChange={(e) => setCode(Number(e.target.value))}
+                        onChange={(e) => setCode(e.target.value)}
                     />
 
-                    <button onClick={() => joinQuiz(code, username)}>Join</button>
+                    <button onClick={() => joinQuiz()}>Join</button>
 
                     {error && <p className="error">{error}</p>}
 
@@ -89,7 +94,7 @@ export default function QuizPage () {
 
                 <div className="container">
 
-                    <Quiz />
+                    <QuizComponent />
 
                 </div>
 

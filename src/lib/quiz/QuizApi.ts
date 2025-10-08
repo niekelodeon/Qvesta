@@ -1,6 +1,6 @@
 import { useAtom } from "jotai"
 
-import type { QuizData } from "../types"
+import type { QuizData, SubmitAnswers } from "../types"
 
 const serverUrl = "https://5ea4cdb3-d273-47de-a442-6e0219ffd3d4.mock.pstmn.io"
 
@@ -21,12 +21,19 @@ async function Request<T> (endpoint: string, options?: RequestInit): Promise<T> 
 
 export const quizApi = {
     // join should also send the quizData back in the response
-    join: (code: number, username: string) => {
+    join: (code: string, username: string) => {
         return Request<{ success: boolean, quizData: QuizData }>(`/quiz/join`, {
             method: "POST",
             body: JSON.stringify({ code, username }),
         })
     },
+
+    submit: (submitAnswers: SubmitAnswers) => {
+        return Request<{ success: boolean, quizData: QuizData }>(`/quiz/join`, {
+            method: "POST",
+            body: JSON.stringify({ submitAnswers }),
+        })
+    }
 
 }
 
