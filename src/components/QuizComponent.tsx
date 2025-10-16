@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react"
-import { useAtom } from "jotai"
+import React, { useState, useEffect } from 'react'
+import { useAtom } from 'jotai'
 
-import { quizDataAtom, quizCompletedAtom, quizAnswersAtom } from "../lib/atoms"
+import { quizDataAtom, quizCompletedAtom, quizAnswersAtom } from '../lib/atoms'
 
-import type { QuestionData } from "../lib/types"
+import type { QuestionData } from '../lib/types'
 
-export default function QuizComponent () {
+export default function QuizComponent() {
     const [quizData, setQuizData] = useAtom(quizDataAtom)
     const [quizAnswers, setQuizAnswers] = useAtom(quizAnswersAtom)
     const [quizCompleted, setQuizCompleted] = useAtom(quizCompletedAtom)
@@ -19,17 +19,17 @@ export default function QuizComponent () {
     const [givenAnswer, setGivenAnswer] = useState<any>()
 
     const [allowNavigating, setAllowNavigating] = useState<boolean>(quizData.navigate)
-    const [progression, setProgression] = useState<number>(0)
-    
-    function getAnswer (questionId: number) {
+    const [quizProgression, setQuizProgression] = useState<number>(0)
+
+    function getAnswer(questionId: number) {
         const answer = quizAnswers.find(a => a.id === questionId)
         setGivenAnswer(answer?.chosenAnswer ?? null)
     }
 
-    function saveAnswer (questionId: number, chosenAnswer: number | null) {
+    function saveAnswer(questionId: number, chosenAnswer: number | null) {
         chosenAnswer = chosenAnswer ?? null
 
-        setQuizAnswers((prev) => {
+        setQuizAnswers(prev => {
             const existingIndex = prev.findIndex(a => a.id === questionId)
 
             if (existingIndex !== -1) {
@@ -42,7 +42,7 @@ export default function QuizComponent () {
         })
     }
 
-    function loadQuestion (newIndex: number) {
+    function loadQuestion(newIndex: number) {
         const question = quizData.questions[newIndex]
 
         setQuestionIndex(newIndex)
@@ -50,13 +50,10 @@ export default function QuizComponent () {
         setQuestionTime(question.time)
     }
 
-    function nextQuestion (answerIndex?: number | null) {
+    function nextQuestion(answerIndex?: number | null) {
         if (!questionData) return
 
-        const chosenAnswer =
-        typeof answerIndex === "number"
-        ? answerIndex + 1
-        : quizAnswers.find(a => a.id === questionData.id)?.chosenAnswer ?? null
+        const chosenAnswer = typeof answerIndex === 'number' ? answerIndex + 1 : (quizAnswers.find(a => a.id === questionData.id)?.chosenAnswer ?? null)
 
         saveAnswer(questionData.id, chosenAnswer)
         setGivenAnswer(chosenAnswer)
@@ -64,23 +61,23 @@ export default function QuizComponent () {
         const next = questionIndex + 1
         if (next >= totalQuestions) {
             setQuizCompleted(true)
-            console.log({ quizId: quizData.id, username: "TestQuiz_User", answers: quizAnswers })
+            console.log({ quizId: quizData.id, username: 'TestQuiz_User', answers: quizAnswers })
             return
         }
 
         loadQuestion(next)
     }
 
-    function prevQuestion () {
-        if (questionIndex === 0) return 
+    function prevQuestion() {
+        if (questionIndex === 0) return
 
         const newIndex = questionIndex - 1
 
         loadQuestion(newIndex)
     }
 
-    function quizTimer (quizTime: number | null) {
-        if (quizTime === null) return 
+    function quizTimer(quizTime: number | null) {
+        if (quizTime === null) return
 
         let remaining = quizTime
 
@@ -97,7 +94,7 @@ export default function QuizComponent () {
         return () => clearInterval(interval)
     }
 
-    function questionTimer (questionTime: number | null, nextQuestion: Function) {
+    function questionTimer(questionTime: number | null, nextQuestion: Function) {
         if (questionTime === null) return
 
         let remaining = questionTime
@@ -115,63 +112,43 @@ export default function QuizComponent () {
         return () => clearInterval(interval)
     }
 
-    useEffect(() => {  
-        setProgression(Math.round((questionIndex * 100) / totalQuestions))
+    useEffect(() => {
+        setQuizProgression(Math.round((questionIndex * 100) / totalQuestions))
         getAnswer(questionData.id)
         return quizTimer(quizTime), questionTimer(questionTime, nextQuestion)
     }, [quizData, questionIndex])
 
     return (
-
         <div className="container">
-
             <div className="container">
-
                 <div className="container">
-
                     <h1>{quizTime} Quiz Time</h1>
 
                     <h1>{questionTime} Question Time</h1>
 
                     <h2>{questionData.question}</h2>
-
                 </div>
 
-                <div className="container-answers" style={{ display: "flex", gap: "20px" }}>
-
+                <div className="container-answers" style={{ display: 'flex', gap: '20px' }}>
                     {questionData.answers.map((answer, i) => (
-
                         <span onClick={() => nextQuestion(i)} key={i}>
-
                             {answer}
-                            
                         </span>
-
                     ))}
 
-                    {givenAnswer !== null && givenAnswer !== undefined ? givenAnswer : "Not answered"}
-
+                    {givenAnswer !== null && givenAnswer !== undefined ? givenAnswer : 'Not answered'}
                 </div>
 
                 {allowNavigating ? (
-
                     <div className="container-navigate">
-
                         <button onClick={() => prevQuestion()}>Go back</button>
 
                         <button onClick={() => nextQuestion()}>Go forward</button>
-
                     </div>
-
                 ) : (
-
                     <div className="container-navigate">navigating is disabled</div>
-
                 )}
-
             </div>
-
         </div>
-
     )
 }
