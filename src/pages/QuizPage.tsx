@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react"
-import { useAtom } from "jotai"
+import React, { useState, useEffect } from 'react'
+import { useAtom } from 'jotai'
 
-import { quizDataAtom, quizCompletedAtom, quizAnswersAtom } from "../lib/atoms"
+import { quizDataAtom, quizCompletedAtom, quizAnswersAtom } from '../lib/atoms'
 
-import type { SubmitAnswers } from "../lib/types"
+import type { SubmitAnswers } from '../lib/types'
 
-import { testQuizData } from "../lib/quiz/testQuizData"
+import { testQuizData } from '../lib/quiz/testQuizData'
 
-import { quizApi } from "../lib/quiz/QuizApi"
+import { quizApi } from '../lib/quiz/QuizApi'
 
-import QuizComponent from "../components/QuizComponent"
+import QuizComponent from '../components/QuizComponent'
 
-export default function QuizPage () {
+export default function QuizPage() {
     const [code, setCode] = useState<string>()
-    const [username, setUsername] = useState<string>("")
+    const [username, setUsername] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
     const [joinedQuiz, setJoinedQuiz] = useState<boolean>(false)
 
@@ -22,27 +22,28 @@ export default function QuizPage () {
     const [quizAnswers] = useAtom(quizAnswersAtom)
     const [quizCompleted] = useAtom(quizCompletedAtom)
 
-    async function joinQuiz () {
+    async function joinQuiz() {
         try {
             const response = await quizApi.join(code, username)
 
-            if (!response.success) setError("Invalid code")
-            else if (response.success) setJoinedQuiz(true); setQuizData(response.quizData)
+            if (!response.success) setError('Invalid code')
+            else if (response.success) setJoinedQuiz(true)
+            setQuizData(response.quizData)
         } catch (err: any) {
             setError(err)
-            console.error("Failed to join quiz:", error)
+            console.error('Failed to join quiz:', error)
         }
     }
 
-    function startQuiz () {
+    function startQuiz() {
         setQuizStarted(true)
     }
 
-    async function finishQuiz () {
+    async function finishQuiz() {
         const submitAnswers: SubmitAnswers = {
             quizId: quizData.id,
             username,
-            answers: quizAnswers
+            answers: quizAnswers,
         }
 
         await quizApi.submit(submitAnswers)
@@ -53,65 +54,36 @@ export default function QuizPage () {
     }, [quizCompleted])
 
     return (
-
         <div className="container">
-
             {quizCompleted ? (
-
                 <div className="container">
-
                     <h1>Quiz completed!</h1>
-
                 </div>
-
             ) : !joinedQuiz ? (
-
                 <div className="container">
-
                     <h1>Join Quiz</h1>
 
-                    <input
-                        type="text"
-                        placeholder="Enter username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
+                    <input type="text" placeholder="Enter username" value={username} onChange={e => setUsername(e.target.value)} />
 
-                    <input
-                        type="text"
-                        placeholder="Enter code"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                    />
+                    <input type="text" placeholder="Enter code" value={code} onChange={e => setCode(e.target.value)} />
 
                     <button onClick={() => joinQuiz()}>Join</button>
 
                     {error && <p className="error">{error}</p>}
-
                 </div>
-
             ) : quizStarted ? (
-
                 <div className="container">
-
                     <QuizComponent />
-
                 </div>
-
             ) : (
                 <div className="container">
-
                     <h1>{quizData?.name}</h1>
-                    
+
                     <p>{quizData?.description}</p>
 
                     <button onClick={() => startQuiz()}>Start</button>
-
                 </div>
             )}
-
         </div>
-
     )
-
 }

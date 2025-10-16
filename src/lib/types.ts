@@ -36,12 +36,11 @@ export interface QuizResult {
 
 // export interface multiSectionQuiz {
 //     id: number
-//     title: string                
-//     description: string | null        
-//     image?: string | null       
-//     time: number | null        
-//     navigate?: boolean             
-//     progress?: boolean             
-//     questions: Question[]   
+//     title: string
+//     description: string | null
+//     image?: string | null
+//     time: number | null
+//     navigate?: boolean
+//     progress?: boolean
+//     questions: Question[]
 // }
-
